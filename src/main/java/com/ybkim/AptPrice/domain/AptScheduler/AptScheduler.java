@@ -36,8 +36,8 @@ public class AptScheduler {
     AptApiDbSVC aptApiDbSVC;
 
 
-    @Scheduled(cron = "*/5 * * * * *")
-//    @Scheduled(cron = "0 0 0 1 * ?")
+//    @Scheduled(cron = "*/5 * * * * *")
+    @Scheduled(cron = "0 0 0 1 * ?")
 //@Scheduled(cron = "0 34 23 * * ?")
     public void myScheduledMethod() throws IOException, ParseException, ParserConfigurationException, SAXException {
 
