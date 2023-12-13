@@ -74,12 +74,12 @@ function cbSidoCd(res) {
     $searchDongCd.innerHTML = "";
 
     var opt2 = document.createElement("option");
-    opt2.value = "";
+    opt2.value = " ";
     opt2.innerHTML = "전체";
     $searchGugunCd.appendChild(opt2);
 
     var opt3 = document.createElement("option");
-    opt3.value = "";
+    opt3.value = " ";
     opt3.innerHTML = "전체";
     $searchDongCd.appendChild(opt3);
 
@@ -97,7 +97,7 @@ function cbGugunCd(res) {
     $searchDongCd.innerHTML = "";
 
     var opt3 = document.createElement("option");
-    opt3.value = "";
+    opt3.value = " ";
     opt3.innerHTML = "전체";
     $searchDongCd.appendChild(opt3);
 
@@ -160,8 +160,16 @@ function search_f(e) {
         $searchAreaValue = 0;
         $searchAreaValueTo = 10000;
     }
+
+    const searchSidoCdText = $searchSidoCd.options[$searchSidoCd.selectedIndex].text == '전체' ? ' ' : $searchSidoCd.options[$searchSidoCd.selectedIndex].text;
+    const searchGugunCdText = $searchGugunCd.options[$searchGugunCd.selectedIndex].text == '전체' ? ' ' : $searchGugunCd.options[$searchGugunCd.selectedIndex].text;
+    const searchDongCdText = $searchDongCd.options[$searchDongCd.selectedIndex].text == '전체' ? ' ' : $searchDongCd.options[$searchDongCd.selectedIndex].text;
+    //
+    const url = `/MyHomePrice/list/1/${$contractDate.value}/${$contractDateTo.value}/${searchSidoCdText}/${searchGugunCdText}/${searchDongCdText}/${$searchArea.value}/${$searchAreaValue}/${$searchAreaValueTo}/${$searchFromAmount.value}/${$searchToAmnount.value}`;
+
+
     //조건 검색
-    const url = `/MyHomePrice/list/1/${$contractDate.value}/${$contractDateTo.value}/${$searchSidoCd.options[$searchSidoCd.selectedIndex].text}/${$searchGugunCd.options[$searchGugunCd.selectedIndex].text}/${$searchDongCd.options[$searchDongCd.selectedIndex].text}/${$searchArea.value}/${$searchAreaValue}/${$searchAreaValueTo}/${$searchFromAmount.value}/${$searchToAmnount.value}`;
+    // const url = `/MyHomePrice/list/1/${$contractDate.value}/${$contractDateTo.value}/${$searchSidoCd.options[$searchSidoCd.selectedIndex].text}/${$searchGugunCd.options[$searchGugunCd.selectedIndex].text}/${$searchDongCd.options[$searchDongCd.selectedIndex].text}/${$searchArea.value}/${$searchAreaValue}/${$searchAreaValueTo}/${$searchFromAmount.value}/${$searchToAmnount.value}`;
     location.href = url;
 }
 

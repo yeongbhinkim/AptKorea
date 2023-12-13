@@ -117,8 +117,9 @@
           const transactioncountlistArr = transactioncountlist.split(',');
           console.log(transactioncountlistArr);
 
-          const contract = item.contract;
-          const contractArr = contract.split(',');
+          // const contract = item.contract;
+          const contract = item.fullContractDate;
+          const contractArr = contract.split('-');
 
           /* Data for the chart */
           var data = {

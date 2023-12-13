@@ -17,44 +17,60 @@ import java.util.List;
 
 public class AptApiDbDAOImpl implements AptApiDbDAO {
 
-  private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-  /**
-   * API -> DB insert
-   *
-   * @return
-   */
+    /**
+     * API -> DB insert
+     *
+     * @return
+     */
 
-  @Override
-  public void insertApiDb(AptApiDb aptApiDb) {
-    StringBuffer sql = new StringBuffer();
+    @Override
+    public void insertApiDb(AptApiDb aptApiDb) {
 //    System.out.println("aptApiDb = " + aptApiDb);
+        StringBuilder sql = new StringBuilder();
+        sql.append(" INSERT INTO apt ( ");
+        sql.append("     apt_id, city, street, bon_bun, bu_bun, dan_gi_myeong, ");
+        sql.append("     square_meter, contract_date, contract_day, amount, ");
+        sql.append("     layer, construction_date, road_name, reason_cancellation_date, ");
+        sql.append("     transaction_type, location_agency, full_contract_date ");
+        sql.append(" ) VALUES ( ");
+        sql.append("     NULL, ?, ?, ?, ?, ?, ");  // 'apt_id'는 AUTO_INCREMENT이므로 NULL을 사용합니다
+        sql.append("     ?, ?, ?, ?, ");
+        sql.append("     ?, ?, ?, ?, ");
+        sql.append("     ?, ?, ? ");  // 'full_contract_date' 필드 추가
+        sql.append(" ) ON DUPLICATE KEY UPDATE ");
+        sql.append("     city = VALUES(city), street = VALUES(street), bon_bun = VALUES(bon_bun), ");
+        sql.append("     bu_bun = VALUES(bu_bun), dan_gi_myeong = VALUES(dan_gi_myeong), ");
+        sql.append("     square_meter = VALUES(square_meter), contract_date = VALUES(contract_date), ");
+        sql.append("     contract_day = VALUES(contract_day), amount = VALUES(amount), ");
+        sql.append("     layer = VALUES(layer), construction_date = VALUES(construction_date), ");
+        sql.append("     road_name = VALUES(road_name), reason_cancellation_date = VALUES(reason_cancellation_date), ");
+        sql.append("     transaction_type = VALUES(transaction_type), location_agency = VALUES(location_agency), ");
+        sql.append("     full_contract_date = VALUES(full_contract_date)");
 
-    sql.append(" INSERT INTO apt ( ");
-    sql.append("     apt_id, city, street, bon_bun, bu_bun, dan_gi_myeong, ");
-    sql.append("     square_meter, contract_date, contract_day, amount, ");
-    sql.append("     layer, construction_date, road_name, reason_cancellation_date, ");
-    sql.append("     transaction_type, location_agency ");
-    sql.append(" ) VALUES ( ");
-    sql.append("     NEXTVAL(apt_id_seq), ?, ?, ?, ?, ?, ");
-    sql.append("     ?, ?, ?, ?, ");
-    sql.append("     ?, ?, ?, ?, ");
-    sql.append("     ?, ? ");
-    sql.append(" ) ON DUPLICATE KEY UPDATE ");
-    sql.append("     city = VALUES(city), street = VALUES(street), bon_bun = VALUES(bon_bun), ");
-    sql.append("     bu_bun = VALUES(bu_bun), dan_gi_myeong = VALUES(dan_gi_myeong), ");
-    sql.append("     square_meter = VALUES(square_meter), contract_date = VALUES(contract_date), ");
-    sql.append("     contract_day = VALUES(contract_day), amount = VALUES(amount), ");
-    sql.append("     layer = VALUES(layer), construction_date = VALUES(construction_date), ");
-    sql.append("     road_name = VALUES(road_name), reason_cancellation_date = VALUES(reason_cancellation_date), ");
-    sql.append("     transaction_type = VALUES(transaction_type), location_agency = VALUES(location_agency)");
 
-    jdbcTemplate.update(sql.toString(), aptApiDb.getCity(), aptApiDb.getStreet(), aptApiDb.getBon_bun(),
-            aptApiDb.getBu_bun(), aptApiDb.getDan_gi_myeong(), aptApiDb.getSquare_meter(), aptApiDb.getContract_date(),
-            aptApiDb.getContract_day(), aptApiDb.getAmount(), aptApiDb.getLayer(), aptApiDb.getConstruction_date(),
-            aptApiDb.getRoad_name(), aptApiDb.getReason_cancellation_date(), aptApiDb.getTransaction_type(),
-            aptApiDb.getLocation_agency());
-  }
+        jdbcTemplate.update(
+                sql.toString(),
+                aptApiDb.getCity(),
+                aptApiDb.getStreet(),
+                aptApiDb.getBon_bun(),
+                aptApiDb.getBu_bun(),
+                aptApiDb.getDan_gi_myeong(),
+                aptApiDb.getSquare_meter(),
+                aptApiDb.getContract_date(),
+                aptApiDb.getContract_day(),
+                aptApiDb.getAmount(),
+                aptApiDb.getLayer(),
+                aptApiDb.getConstruction_date(),
+                aptApiDb.getRoad_name(),
+                aptApiDb.getReason_cancellation_date(),
+                aptApiDb.getTransaction_type(),
+                aptApiDb.getLocation_agency(),
+                aptApiDb.getFullContractDate() // 'FULL_CONTRACT_DATE' 필드를 위한 getter 추가
+        );
+
+    }
 
 
 //  @Override
@@ -127,42 +143,42 @@ public class AptApiDbDAOImpl implements AptApiDbDAO {
 //
 //  }
 
-  /**
-   * 시군구 조회
-   *
-   * @return
-   */
-  @Override
-  public List<CountyCode> apiSelectRegionCounty() {
-    StringBuffer sql = new StringBuffer();
+    /**
+     * 시군구 조회
+     *
+     * @return
+     */
+    @Override
+    public List<CountyCode> apiSelectRegionCounty() {
+        StringBuffer sql = new StringBuffer();
 
-    sql.append(" SELECT COUNTY_CODE FROM REGION_COUNTY ");
+        sql.append(" SELECT COUNTY_CODE FROM REGION_COUNTY ");
 
-    List<CountyCode> list = jdbcTemplate.query(sql.toString(),
-            new BeanPropertyRowMapper<>(CountyCode.class)
-    );
-    return list;
-  }
+        List<CountyCode> list = jdbcTemplate.query(sql.toString(),
+                new BeanPropertyRowMapper<>(CountyCode.class)
+        );
+        return list;
+    }
 
-  /**
-   * 시군구 조회
-   *
-   * @return
-   */
-  @Override
-  public CountyCode selectCity(String SCHEDULER_CITY_CODE) {
-    StringBuffer sql = new StringBuffer();
-    String cityCodePrefix = SCHEDULER_CITY_CODE.substring(0, 2);
+    /**
+     * 시군구 조회
+     *
+     * @return
+     */
+    @Override
+    public CountyCode selectCity(String SCHEDULER_CITY_CODE) {
+        StringBuffer sql = new StringBuffer();
+        String cityCodePrefix = SCHEDULER_CITY_CODE.substring(0, 2);
 
-    sql.append(" SELECT ");
-    sql.append(" CONCAT((SELECT CITY_NM FROM region_city WHERE CITY_CODE = ?) ");
-    sql.append(" ,' ', ");
-    sql.append(" (SELECT COUNTY_NM FROM region_county WHERE COUNTY_CODE = ?)) AS SCHEDULER_CITY_CODE ");
+        sql.append(" SELECT ");
+        sql.append(" CONCAT((SELECT CITY_NM FROM region_city WHERE CITY_CODE = ?) ");
+        sql.append(" ,' ', ");
+        sql.append(" (SELECT COUNTY_NM FROM region_county WHERE COUNTY_CODE = ?)) AS SCHEDULER_CITY_CODE ");
 
-    CountyCode city = jdbcTemplate.queryForObject(sql.toString(),
-            new BeanPropertyRowMapper<>(CountyCode.class),cityCodePrefix,SCHEDULER_CITY_CODE
-    );
-    return city;
-  }
+        CountyCode city = jdbcTemplate.queryForObject(sql.toString(),
+                new BeanPropertyRowMapper<>(CountyCode.class), cityCodePrefix, SCHEDULER_CITY_CODE
+        );
+        return city;
+    }
 
 }
