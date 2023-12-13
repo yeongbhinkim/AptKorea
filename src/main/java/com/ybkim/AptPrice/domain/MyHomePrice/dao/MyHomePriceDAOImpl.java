@@ -28,26 +28,54 @@ public class MyHomePriceDAOImpl implements MyHomePriceDAO {
   public List<MyHomePrice> selectMyHomePriceList(MyHomePriceFilterCondition myHomePriceFilterCondition) {
     StringBuffer sql = new StringBuffer();
 //    log.info("myHomePriceFilterCondition = {}", myHomePriceFilterCondition);
-    sql.append(" SELECT B.* ");
-    sql.append("  ,GET_CONTRACT(B.CITY,B.STREET,B.BON_BUN,B.BU_BUN,B.DAN_GI_MYEONG,B.SQUARE_METER,B.LAYER,B.CONSTRUCTION_DATE) AS CONTRACT  ");
-    sql.append("  ,GET_TRANSACTIONCOUNT_LIST(B.CITY,B.STREET,B.BON_BUN,B.BU_BUN,B.DAN_GI_MYEONG,B.SQUARE_METER,B.LAYER,B.CONSTRUCTION_DATE) AS TRANSACTIONCOUNTLIST ");
-    sql.append(" FROM (");
-    sql.append(" SELECT A.* ");
-    sql.append("  ,ROW_NUMBER() OVER (ORDER BY CONTRACT_DATE DESC, LPAD(CONTRACT_DAY, 2, '0') DESC) NO ");
-    sql.append("  FROM( ");
-    sql.append("   SELECT  ");
-    sql.append("  ROW_NUMBER() OVER (PARTITION BY A.CITY ,A.STREET ,A.BON_BUN ,A.BU_BUN ,A.DAN_GI_MYEONG ,A.SQUARE_METER ,A.LAYER ,A.CONSTRUCTION_DATE ORDER BY A.CONTRACT_DATE DESC) AS RN  ");
-    sql.append("  ,A.* FROM APT A ");
-    sql.append("   WHERE 1 = 1");
-    sql.append("   AND CONCAT(CONTRACT_DATE, LPAD(CONTRACT_DAY, 2, 0)) BETWEEN REPLACE(?,'-','') AND REPLACE(?,'-','') ");
-    sql.append("   AND CITY LIKE CONCAT('%', REPLACE(?, '전체', ''), '%', '%', REPLACE(?, '전체', ''), '%', '%', REPLACE(?, '전체', ''), '%') ");
-    sql.append("   AND CAST(SUBSTR(SQUARE_METER, 1, INSTR(SQUARE_METER, '.') - 1) AS UNSIGNED)   BETWEEN  CAST(? AS UNSIGNED)  AND  CAST(? AS UNSIGNED) ");
-    sql.append("   AND CAST(REPLACE(AMOUNT, ',', '') AS UNSIGNED) BETWEEN  CAST(REPLACE(?, ',', '') AS UNSIGNED)  AND  CAST(REPLACE(?, ',', '') AS UNSIGNED) ");
-    sql.append("   ORDER BY CONTRACT_DATE DESC, LPAD(CONTRACT_DAY, 2, '0') DESC ");
-    sql.append(" ) A ");
-    sql.append(" WHERE A.RN= 1 ");
-    sql.append(" ) B ");
-    sql.append(" WHERE B.NO BETWEEN CAST(? AS UNSIGNED) AND CAST(? AS UNSIGNED) ");
+//    sql.append(" SELECT B.* ");
+//    sql.append("  ,GET_CONTRACT(B.CITY,B.STREET,B.BON_BUN,B.BU_BUN,B.DAN_GI_MYEONG,B.SQUARE_METER,B.LAYER,B.CONSTRUCTION_DATE) AS CONTRACT  ");
+//    sql.append("  ,GET_TRANSACTIONCOUNT_LIST(B.CITY,B.STREET,B.BON_BUN,B.BU_BUN,B.DAN_GI_MYEONG,B.SQUARE_METER,B.LAYER,B.CONSTRUCTION_DATE) AS TRANSACTIONCOUNTLIST ");
+//    sql.append(" FROM (");
+//    sql.append(" SELECT A.* ");
+//    sql.append("  ,ROW_NUMBER() OVER (ORDER BY CONTRACT_DATE DESC, LPAD(CONTRACT_DAY, 2, '0') DESC) NO ");
+//    sql.append("  FROM( ");
+//    sql.append("   SELECT  ");
+//    sql.append("  ROW_NUMBER() OVER (PARTITION BY A.CITY ,A.STREET ,A.BON_BUN ,A.BU_BUN ,A.DAN_GI_MYEONG ,A.SQUARE_METER ,A.LAYER ,A.CONSTRUCTION_DATE ORDER BY A.CONTRACT_DATE DESC) AS RN  ");
+//    sql.append("  ,A.* FROM APT A ");
+//    sql.append("   WHERE 1 = 1");
+//    sql.append("   AND CONCAT(CONTRACT_DATE, LPAD(CONTRACT_DAY, 2, 0)) BETWEEN REPLACE(?,'-','') AND REPLACE(?,'-','') ");
+//    sql.append("   AND CITY LIKE CONCAT('%', REPLACE(?, '전체', ''), '%', '%', REPLACE(?, '전체', ''), '%', '%', REPLACE(?, '전체', ''), '%') ");
+//    sql.append("   AND CAST(SUBSTR(SQUARE_METER, 1, INSTR(SQUARE_METER, '.') - 1) AS UNSIGNED)   BETWEEN  CAST(? AS UNSIGNED)  AND  CAST(? AS UNSIGNED) ");
+//    sql.append("   AND CAST(REPLACE(AMOUNT, ',', '') AS UNSIGNED) BETWEEN  CAST(REPLACE(?, ',', '') AS UNSIGNED)  AND  CAST(REPLACE(?, ',', '') AS UNSIGNED) ");
+//    sql.append("   ORDER BY CONTRACT_DATE DESC, LPAD(CONTRACT_DAY, 2, '0') DESC ");
+//    sql.append(" ) A ");
+//    sql.append(" WHERE A.RN= 1 ");
+//    sql.append(" ) B ");
+//    sql.append(" WHERE B.NO BETWEEN CAST(? AS UNSIGNED) AND CAST(? AS UNSIGNED) ");
+
+
+
+
+  sql.append(" SELECT B.*  ");
+  sql.append("       ,GET_TRANSACTIONCOUNT_LIST(B.CITY,B.STREET,B.BON_BUN,B.BU_BUN,B.DAN_GI_MYEONG,B.SQUARE_METER,B.LAYER,B.CONSTRUCTION_DATE) AS TRANSACTIONCOUNTLIST  ");
+  sql.append("     FROM (  ");
+  sql.append("             SELECT A.* ,ROW_NUMBER() OVER (ORDER BY FULL_CONTRACT_DATE DESC) NO  ");
+  sql.append("             FROM(  ");
+  sql.append("                     SELECT  ");
+  sql.append("                     ROW_NUMBER() OVER (PARTITION BY A.CITY ,A.STREET ,A.BON_BUN ,A.BU_BUN ,A.DAN_GI_MYEONG ,A.SQUARE_METER ,A.LAYER ORDER BY A.FULL_CONTRACT_DATE DESC) AS RN  ");
+  sql.append("                     ,A.*  ");
+  sql.append("                             FROM APT A  ");
+  sql.append("                     WHERE 1 = 1  ");
+  sql.append("                     AND FULL_CONTRACT_DATE BETWEEN ? AND ?  ");
+  sql.append("                     AND CITY LIKE CONCAT('%', ?, '%', ?, '%', ?, '%')  ");
+  sql.append("                     AND SQUARE_METER BETWEEN ? AND ?  ");
+  sql.append("                     AND AMOUNT BETWEEN ? AND ?  ");
+  sql.append("   ORDER BY A.FULL_CONTRACT_DATE DESC ");
+  sql.append("     ) A  ");
+  sql.append("     WHERE A.RN= 1  ");
+  sql.append(" ) B  ");
+  sql.append("     WHERE B.NO BETWEEN ? AND ?  ");
+  sql.append("     ORDER BY CITY, LAYER  ");
+
+
+
+
 
     List<MyHomePrice> list = jdbcTemplate.query(sql.toString(),
         new BeanPropertyRowMapper<>(MyHomePrice.class),
@@ -79,15 +107,16 @@ public class MyHomePriceDAOImpl implements MyHomePriceDAO {
   public int totalCount(MyHomePriceFilterCondition myHomePriceFilterCondition) {
     StringBuffer sql = new StringBuffer();
     log.info("myHomePriceFilterCondition123 = {}", myHomePriceFilterCondition);
+
     sql.append(" SELECT count(*) as COUNT FROM( ");
     sql.append("   SELECT ");
     sql.append("   ROW_NUMBER() OVER (PARTITION BY A.CITY ,A.STREET ,A.BON_BUN ,A.BU_BUN ,A.DAN_GI_MYEONG ,A.SQUARE_METER ,A.LAYER ,A.CONSTRUCTION_DATE ORDER BY A.CONTRACT_DATE DESC) AS RN  ");
     sql.append("   FROM APT A ");
-    sql.append("   WHERE 1 = 1");
-    sql.append("   AND CONCAT(CONTRACT_DATE, LPAD(CONTRACT_DAY, 2, 0)) BETWEEN REPLACE(?,'-','') AND REPLACE(?,'-','') ");
-    sql.append("   AND CITY LIKE CONCAT('%', REPLACE(?, '전체', ''), '%', '%', REPLACE(?, '전체', ''), '%', '%', REPLACE(?, '전체', ''), '%') ");
-    sql.append("   AND CAST(SUBSTR(SQUARE_METER, 1, INSTR(SQUARE_METER, '.') - 1) AS UNSIGNED)   BETWEEN  CAST(? AS UNSIGNED)  AND  CAST(? AS UNSIGNED) ");
-    sql.append("   AND CAST(REPLACE(AMOUNT, ',', '') AS UNSIGNED) BETWEEN  CAST(REPLACE(?, ',', '') AS UNSIGNED)  AND  CAST(REPLACE(?, ',', '') AS UNSIGNED) ");
+    sql.append("   WHERE 1 = 1  ");
+    sql.append("   AND FULL_CONTRACT_DATE BETWEEN ? AND ?  ");
+    sql.append("   AND CITY LIKE CONCAT('%', ?, '%', ?, '%', ?, '%')  ");
+    sql.append("   AND SQUARE_METER  BETWEEN ? AND ?  ");
+    sql.append("   AND AMOUNT BETWEEN ? AND ?  ");
     sql.append(" ) A ");
     sql.append(" WHERE A.RN= 1 ");
 
@@ -160,15 +189,15 @@ public class MyHomePriceDAOImpl implements MyHomePriceDAO {
     sql.append("              FROM APT B ");
     sql.append("              WHERE APT_ID = ? ) B ");
     sql.append(" WHERE 1 = 1 ");
-    sql.append(" AND A.CITY LIKE CONCAT('%', B.CITY, '%') ");
-    sql.append(" AND A.STREET LIKE CONCAT('%', B.STREET, '%') ");
-    sql.append(" AND A.BON_BUN LIKE CONCAT('%', B.BON_BUN, '%') ");
-    sql.append(" AND A.BU_BUN LIKE CONCAT('%', B.BU_BUN, '%') ");
-    sql.append(" AND A.DAN_GI_MYEONG LIKE CONCAT('%', B.DAN_GI_MYEONG, '%') ");
-    sql.append(" AND A.SQUARE_METER LIKE CONCAT('%', B.SQUARE_METER, '%') ");
-    sql.append(" AND A.LAYER LIKE CONCAT('%', B.LAYER, '%') ");
-    sql.append(" AND A.CONSTRUCTION_DATE LIKE CONCAT('%', B.CONSTRUCTION_DATE, '%') ");
-    sql.append(" ORDER BY CONCAT(A.CONTRACT_DATE, LPAD(A.CONTRACT_DAY, 2, '0')) DESC ");
+    sql.append(" AND A.CITY = B.CITY  ");
+    sql.append(" AND A.STREET = B.STREET  ");
+    sql.append(" AND A.BON_BUN = B.BON_BUN  ");
+    sql.append(" AND A.BU_BUN = B.BU_BUN  ");
+    sql.append(" AND A.DAN_GI_MYEONG = B.DAN_GI_MYEONG  ");
+    sql.append(" AND A.SQUARE_METER = B.SQUARE_METER  ");
+    sql.append(" AND A.LAYER = B.LAYER  ");
+    sql.append(" AND A.CONSTRUCTION_DATE = B.CONSTRUCTION_DATE  ");
+    sql.append(" ORDER BY FULL_CONTRACT_DATE DESC ");
 
     List<MyHomePrice> detaillist = jdbcTemplate.query(sql.toString(),
         new BeanPropertyRowMapper<>(MyHomePrice.class),
@@ -189,20 +218,20 @@ public class MyHomePriceDAOImpl implements MyHomePriceDAO {
   @Override
   public List<MyHomePrice> selectMyHomePriceScatterChart(Long apt_id) {
     StringBuffer sql = new StringBuffer();
-
-    sql.append(" SELECT CONCAT(A.CONTRACT_DATE, LPAD(A.CONTRACT_DAY, 2, '0')) as x, TRIM(REPLACE(A.AMOUNT, ',', '')) as y ");
+//    sql.append(" SELECT CONCAT(A.CONTRACT_DATE, LPAD(A.CONTRACT_DAY, 2, '0')) as x, TRIM(REPLACE(A.AMOUNT, ',', '')) as y ");
+    sql.append(" SELECT REPLACE(A.FULL_CONTRACT_DATE,'-','') as x, A.AMOUNT as y ");
     sql.append(" FROM APT A, (SELECT * ");
     sql.append("              FROM APT B ");
     sql.append("              WHERE APT_ID = ? ) B ");
     sql.append(" WHERE 1 = 1 ");
-    sql.append(" AND A.CITY LIKE CONCAT('%', B.CITY, '%') ");
-    sql.append(" AND A.STREET LIKE CONCAT('%', B.STREET, '%') ");
-    sql.append(" AND A.BON_BUN LIKE CONCAT('%', B.BON_BUN, '%') ");
-    sql.append(" AND A.BU_BUN LIKE CONCAT('%', B.BU_BUN, '%') ");
-    sql.append(" AND A.DAN_GI_MYEONG LIKE CONCAT('%', B.DAN_GI_MYEONG, '%') ");
-    sql.append(" AND A.SQUARE_METER LIKE CONCAT('%', B.SQUARE_METER, '%') ");
-    sql.append(" AND A.LAYER LIKE CONCAT('%', B.LAYER, '%') ");
-    sql.append(" AND A.CONSTRUCTION_DATE LIKE CONCAT('%', B.CONSTRUCTION_DATE, '%') ");
+    sql.append(" AND A.CITY = B.CITY ");
+    sql.append(" AND A.STREET = B.STREET ");
+    sql.append(" AND A.BON_BUN = B.BON_BUN ");
+    sql.append(" AND A.BU_BUN = B.BU_BUN ");
+    sql.append(" AND A.DAN_GI_MYEONG = B.DAN_GI_MYEONG ");
+    sql.append(" AND A.SQUARE_METER = B.SQUARE_METER ");
+    sql.append(" AND A.LAYER = B.LAYER ");
+    sql.append(" AND A.CONSTRUCTION_DATE = B.CONSTRUCTION_DATE ");
 
     List<MyHomePrice> ScatterChart = jdbcTemplate.query(sql.toString(),
         new BeanPropertyRowMapper<>(MyHomePrice.class),
