@@ -45,7 +45,7 @@ public class homeDAOImpl implements homeDAO {
     StringBuffer sql = new StringBuffer();
 
     sql.append(" SELECT * FROM REGION_COUNTY  ");
-    sql.append(" WHERE SUBSTR(COUNTY_CODE, 1,2 ) = ? ");
+    sql.append(" WHERE SUBSTR(COUNTY_CODE, 1,2 ) = SUBSTR(?, 1,2 ) ");
     sql.append(" ORDER BY 2 ");
 
     List<home> list = jdbcTemplate.query(sql.toString(),
@@ -64,7 +64,7 @@ public class homeDAOImpl implements homeDAO {
     StringBuffer sql = new StringBuffer();
 
     sql.append(" SELECT * FROM REGION_DISTRICTS  ");
-    sql.append(" WHERE SUBSTR(DISTRICTS_CODE, 1, 5 ) = ? ");
+    sql.append(" WHERE SUBSTR(DISTRICTS_CODE, 1, 5 ) = SUBSTR(?, 1, 5 ) ");
     sql.append(" ORDER BY 2 ");
 
     List<home> list = jdbcTemplate.query(sql.toString(),

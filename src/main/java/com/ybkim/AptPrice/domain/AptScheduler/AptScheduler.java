@@ -2,6 +2,7 @@ package com.ybkim.AptPrice.domain.AptScheduler;
 
 import com.ybkim.AptPrice.domain.AptScheduler.svc.AptApiDbSVC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -35,6 +36,8 @@ public class AptScheduler {
     @Autowired
     AptApiDbSVC aptApiDbSVC;
 
+    @Value("${external.api.molit.serviceKey}")
+    private String serviceKey;
 
 //    @Scheduled(cron = "*/5 * * * * *")
     @Scheduled(cron = "0 0 0 1 * ?")
@@ -57,7 +60,7 @@ public class AptScheduler {
             System.out.println("county.getCounty_code() = " + county.getCounty_code());
 
             StringBuilder urlBuilder = new StringBuilder("http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev"); /*URL*/
-            urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=GIzL%2BzqBUKfyHh3o%2F38ufLPiq5P%2FReUOx6NCLFEcP7rqQei%2FPIM3QbUw3rLU1gYOQfdeIREA1cLZF7lRIP5zTg%3D%3D"); /*Service Key*/
+            urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + serviceKey); /*Service Key*/
 //            urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
 //            urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("1000000", "UTF-8")); /*한 페이지 결과 수*/
 //            urlBuilder.append("&" + URLEncoder.encode("LAWD_CD", "UTF-8") + "=" + URLEncoder.encode("11110", "UTF-8")); /*지역코드*/

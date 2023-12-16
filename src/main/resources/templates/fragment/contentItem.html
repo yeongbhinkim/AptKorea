@@ -163,8 +163,7 @@
     <!-- End of container -->
   </form>
 
-  <script type="text/javascript"
-          src="//dapi.kakao.com/v2/maps/sdk.js?appkey=410b3a83564f0bac127be038fded443b&libraries=services"></script>
+  <script type="text/javascript" th:src="@{${kakaoServiceKey}}"></script>
   <script>
       // const $AptName = AptName.textContent;
       //road_name으로 변경

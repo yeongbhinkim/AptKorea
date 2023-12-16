@@ -11,12 +11,13 @@ import lombok.ToString;
 public class MyHomePriceFilterCondition {
 
   @NotBlank
-  private String contractDate;       //시작 계약일자
-  @NotBlank
-  private String contractDateTo;     //종료 계약일자
   private String searchSidoCd;       //시도
   private String searchGugunCd;      //시군구
   private String searchDongCd;       //읍면동
+  @NotBlank
+  private String contractDate;       //시작 계약일자
+  @NotBlank
+  private String contractDateTo;     //종료 계약일자
   private String searchArea;         //면적
   private String searchAreaValue;   //시작 면적
   private String searchAreaValueTo;  //종료 면적

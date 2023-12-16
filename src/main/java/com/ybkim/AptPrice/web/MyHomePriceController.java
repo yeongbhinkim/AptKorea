@@ -4,17 +4,20 @@ package com.ybkim.AptPrice.web;
 import com.ybkim.AptPrice.domain.MyHomePrice.MyHomePrice;
 import com.ybkim.AptPrice.domain.MyHomePrice.dao.MyHomePriceFilterCondition;
 import com.ybkim.AptPrice.domain.MyHomePrice.svc.MyHomePriceSVC;
-import com.ybkim.AptPrice.domain.home.svc.homeSVC;
 import com.ybkim.AptPrice.domain.common.paging.FindCriteria;
 import com.ybkim.AptPrice.domain.home.home;
+import com.ybkim.AptPrice.domain.home.svc.homeSVC;
 import com.ybkim.AptPrice.web.form.MyHomePrice.MyHomePriceForm;
 import com.ybkim.AptPrice.web.form.MyHomePrice.MyHomePriceListForm;
 import com.ybkim.AptPrice.web.form.MyHomePrice.MyHomePriceScatterChart;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +35,10 @@ import java.util.Optional;
 public class MyHomePriceController {
   private final MyHomePriceSVC MyHomePriceSVC;
   private final homeSVC homeSVC;
+  private static final Logger logger = LogManager.getLogger(MyHomePriceController.class);
+
+  @Value("${external.api.molit.kakaoServiceKey}")
+  private String kakaoServiceKey;
 
   @Autowired
   @Qualifier("fc5") //동일한 타입의 객체가 여러개있을때 빈이름을 명시적으로 지정해서 주입받을때
@@ -55,18 +62,18 @@ public class MyHomePriceController {
    * @return
    */
   @GetMapping({
-      "/list/{reqPage}/{contractDate}/{contractDateTo}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/////",
-      "/list/{reqPage}/{contractDate}/{contractDateTo}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{searchArea}////",
-      "/list/{reqPage}/{contractDate}/{contractDateTo}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{searchArea}///{searchFromAmount}/{searchToAmnount}",
-      "/list/{reqPage}/{contractDate}/{contractDateTo}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{searchArea}/{searchAreaValue}/{searchAreaValueTo}//",
-      "/list/{reqPage}/{contractDate}/{contractDateTo}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{searchArea}/{searchAreaValue}/{searchAreaValueTo}/{searchFromAmount}/{searchToAmnount}"})
+      "/list/{reqPage}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{contractDate}/{contractDateTo}/////",
+      "/list/{reqPage}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{contractDate}/{contractDateTo}/{searchArea}////",
+      "/list/{reqPage}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{contractDate}/{contractDateTo}/{searchArea}///{searchFromAmount}/{searchToAmnount}",
+      "/list/{reqPage}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{contractDate}/{contractDateTo}/{searchArea}/{searchAreaValue}/{searchAreaValueTo}//",
+      "/list/{reqPage}/{searchSidoCd}/{searchGugunCd}/{searchDongCd}/{contractDate}/{contractDateTo}/{searchArea}/{searchAreaValue}/{searchAreaValueTo}/{searchFromAmount}/{searchToAmnount}"})
   public String listAndReqPage(
       @PathVariable(required = false) Optional<Integer> reqPage,            //요청페이지, 요청없으면 1
-      @PathVariable(required = false) Optional<String> contractDate,        //시작 계약일자
-      @PathVariable(required = false) Optional<String> contractDateTo,      //종료 계약일자
       @PathVariable(required = false) Optional<String> searchSidoCd,        //시도
       @PathVariable(required = false) Optional<String> searchGugunCd,       //시군구
       @PathVariable(required = false) Optional<String> searchDongCd,        //읍면동
+      @PathVariable(required = false) Optional<String> contractDate,        //시작 계약일자
+      @PathVariable(required = false) Optional<String> contractDateTo,      //종료 계약일자
       @PathVariable(required = false) Optional<String> searchArea,          //면적
       @PathVariable(required = false) Optional<String> searchAreaValue,     //면적
       @PathVariable(required = false) Optional<String> searchAreaValueTo,   //면적
@@ -77,14 +84,17 @@ public class MyHomePriceController {
     model.addAttribute("regionCity", regionCity);
 //    log.info("/list 요청됨 {},{},{},{},{},{},{},{},{}", reqPage, contractDate, contractDateTo
 //        , searchSidoCd, searchGugunCd, searchDongCd, searchArea, searchFromAmount, searchToAmnount);
+    logger.info("/list 요청됨 {},{},{},{},{},{},{},{},{}", reqPage
+        , searchSidoCd, searchGugunCd, searchDongCd, contractDate, contractDateTo
+        , searchArea, searchFromAmount, searchToAmnount);
 
     //FindCriteria 값 설정
     fc.getRc().setReqPage(reqPage.orElse(1));                     //요청페이지, 요청없으면 1
-    fc.setContractDate(contractDate.orElse(""));                  //시작 계약일자
-    fc.setContractDateTo(contractDateTo.orElse(""));              //종료 계약일자
     fc.setSearchSidoCd(searchSidoCd.orElse(""));                  //시도
     fc.setSearchGugunCd(searchGugunCd.orElse(""));                //시군구
     fc.setSearchDongCd(searchDongCd.orElse(""));                  //읍면동
+    fc.setContractDate(contractDate.orElse(""));                  //시작 계약일자
+    fc.setContractDateTo(contractDateTo.orElse(""));              //종료 계약일자
     fc.setSearchArea(searchArea.orElse(""));                      //면적
     fc.setSearchAreaValue(searchAreaValue.orElse("0"));                //시작 면적
     fc.setSearchAreaValueTo(searchAreaValueTo.orElse("10000"));          //종료 면적
@@ -93,7 +103,7 @@ public class MyHomePriceController {
 
     //myHomePriceFilterCondition 값 설정
     MyHomePriceFilterCondition myHomePriceFilterCondition = new MyHomePriceFilterCondition(
-        contractDate.orElse(""), contractDateTo.orElse(""), searchSidoCd.orElse(""), searchGugunCd.orElse(""), searchDongCd.orElse(""),
+        searchSidoCd.orElse(""), searchGugunCd.orElse(""), searchDongCd.orElse(""), contractDate.orElse(""), contractDateTo.orElse(""),
         searchArea.orElse(""), searchAreaValue.orElse("0"), searchAreaValueTo.orElse("10000"), searchFromAmount.orElse("0"),
         searchToAmnount.orElse("100000000"), fc.getRc().getStartRec(), fc.getRc().getEndRec());
 
@@ -136,7 +146,7 @@ public class MyHomePriceController {
 
     List<home> regionCity = homeSVC.regionCity();
     model.addAttribute("regionCity", regionCity);
-
+    model.addAttribute("kakaoServiceKey", kakaoServiceKey);
     //상세정보 Form
     MyHomePrice myHomePrice = MyHomePriceSVC.MyHomePriceDetailForm(apt_id);
 
