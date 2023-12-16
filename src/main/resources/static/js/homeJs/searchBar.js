@@ -1,7 +1,7 @@
 'use strict';
 var now = new Date();
 // 페이지 로드 시 이전 검색 조건 복원 및 시군구, 읍면동 데이터 재조회
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function () {
     if (localStorage.getItem('searchConditions')) {
         const conditions = JSON.parse(localStorage.getItem('searchConditions'));
 
@@ -12,17 +12,19 @@ document.addEventListener('DOMContentLoaded', function() {
         $searchFromAmount.value = conditions.searchFromAmount;
         $searchToAmnount.value = conditions.searchToAmount;
 
-        // 시도 값이 있으면 시군구 데이터를 불러온 후, 시군구 값이 있으면 읍면동 데이터를 불러오기
-        if (conditions.searchSidoCd && conditions.searchSidoCd !== 'ALL') {
-            sidoCd(conditions.searchSidoCd).then(() => {
+        // 시도 및 시군구 데이터 재조회
+        try {
+            if (conditions.searchSidoCd && conditions.searchSidoCd !== 'ALL') {
+                await sidoCd(conditions.searchSidoCd);
                 $searchGugunCd.value = conditions.searchGugunCd;
 
                 if (conditions.searchGugunCd && conditions.searchGugunCd !== 'ALL') {
-                    gugunCd(conditions.searchGugunCd).then(() => {
-                        $searchDongCd.value = conditions.searchDongCd;
-                    });
+                    await gugunCd(conditions.searchGugunCd);
+                    $searchDongCd.value = conditions.searchDongCd;
                 }
-            });
+            }
+        } catch (error) {
+            console.error('Error loading data:', error);
         }
     }
 });
@@ -67,45 +69,52 @@ $searchGugunCd.addEventListener('change', function(e) {
 
 
 
-//시도
-// 시도 선택 시 시군구 데이터 불러오기 함수 수정 (Promise 반환)
+// 시도 데이터를 불러오는 함수
 function sidoCd(sidoCd) {
     return new Promise((resolve, reject) => {
-        if (sidoCd !== '[object PointerEvent]') {
-            const url = '/regionCounty/' + sidoCd;
-            fn_sgg_search(sidoCd, url, (res) => {
-                cbSidoCd(res);
+        const url = '/regionCounty/' + sidoCd;
+        fetch(url, {
+            method: 'GET',
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                cbSidoCd(data); // 데이터 처리 함수 호출
                 resolve();
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                reject(error);
             });
-        }
     });
 }
 
-// 시군구 선택 시 읍면동 데이터 불러오기 함수 수정 (Promise 반환)
+// 시군구 데이터를 불러오는 함수
 function gugunCd(gugunCd) {
     return new Promise((resolve, reject) => {
-        if (gugunCd !== '[object PointerEvent]') {
-            const url = '/regionDistricts/' + gugunCd;
-            fn_sgg_search(gugunCd, url, (res) => {
-                cbGugunCd(res);
+        const url = '/regionDistricts/' + gugunCd;
+        fetch(url, {
+            method: 'GET',
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                cbGugunCd(data); // 데이터 처리 함수 호출
                 resolve();
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                reject(error);
             });
-        }
     });
-}
-
-//ajax 호출
-function fn_sgg_search(param, url, cbSuccess) {
-    fetch(url, {
-        method: 'GET',
-    })
-        .then((res) => res.json())
-        .then((res) => cbSuccess(res))
-        .catch((err) => {
-            console.error('Err:', err);
-        });
-    // console.log('res:', res)
-
 }
 
 //시도 -> 시군구 데이터 셋

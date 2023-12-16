@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private WebView mWebView;
-    private WebSettings mWebSettings;
+//    private WebSettings mWebSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +24,11 @@ public class MainActivity extends AppCompatActivity {
 
         mWebView.setWebViewClient(new WebViewClient()); // 현재 앱을 나가서 새로운 브라우저를 열지 않도록 함.
 
-        mWebSettings = mWebView.getSettings(); // 웹뷰에서 webSettings를 사용할 수 있도록 함.
+        WebSettings mWebSettings = mWebView.getSettings();
+
+//        mWebSettings = mWebView.getSettings(); // 웹뷰에서 webSettings를 사용할 수 있도록 함.
         mWebSettings.setJavaScriptEnabled(true); //웹뷰에서 javascript를 사용하도록 설정
+        mWebSettings.setDomStorageEnabled(true); // DOM Storage 활성화
         mWebSettings.setJavaScriptCanOpenWindowsAutomatically(false); //멀티윈도우 띄우는 것
         mWebSettings.setAllowFileAccess(true); //파일 엑세스
         mWebSettings.setLoadWithOverviewMode(true); // 메타태그
@@ -39,4 +42,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    public void onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack(); // WebView에서 뒤로 갈 수 있으면 뒤로 가기
+        } else {
+            super.onBackPressed(); // 그렇지 않으면 기본 뒤로 가기 동작 수행
+        }
+    }
+
 }
