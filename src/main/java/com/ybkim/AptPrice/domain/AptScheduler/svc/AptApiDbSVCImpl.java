@@ -47,6 +47,11 @@ public class AptApiDbSVCImpl implements AptApiDbSVC {
 
     return AptApiDbDAO.selectCity(city);
   }
+  @Override
+  public CountyCode selectCounty(String county) {
+
+    return AptApiDbDAO.selectCounty(county);
+  }
 
 
 }

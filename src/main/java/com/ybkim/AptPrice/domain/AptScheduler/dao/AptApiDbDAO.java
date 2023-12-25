@@ -22,5 +22,6 @@ public interface AptApiDbDAO {
    */
   List<CountyCode> apiSelectRegionCounty();
 
-  CountyCode selectCity(String SCHEDULER_CITY_CODE);
+  CountyCode selectCity(String city);
+  CountyCode selectCounty(String county);
 }

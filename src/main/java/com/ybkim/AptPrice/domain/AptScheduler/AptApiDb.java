@@ -24,5 +24,7 @@ public class AptApiDb {
 
   private String fullContractDate;            // FULL_CONTRACT_DATE	           datas   년월일
 
+  private String registration_creation;            // FULL_CONTRACT_DATE	           datas   년월일
+
 
 }

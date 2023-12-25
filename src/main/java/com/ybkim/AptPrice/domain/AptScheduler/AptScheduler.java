@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -39,8 +38,10 @@ public class AptScheduler {
     @Value("${external.api.molit.serviceKey}")
     private String serviceKey;
 
-//    @Scheduled(cron = "*/5 * * * * *")
-    @Scheduled(cron = "0 0 0 1 * ?")
+    //    @Scheduled(cron = "*/5 * * * * *")
+    @Scheduled(cron = "0 01 16 * * ?")
+
+//    @Scheduled(cron = "0 0 0 1 * ?")
 //@Scheduled(cron = "0 34 23 * * ?")
     public void myScheduledMethod() throws IOException, ParseException, ParserConfigurationException, SAXException {
 
@@ -59,14 +60,16 @@ public class AptScheduler {
             CountyCode county = apiRegionCounty.get(i);
             System.out.println("county.getCounty_code() = " + county.getCounty_code());
 
+            String countyCode = county.getCounty_code().substring(0, 5);
+
             StringBuilder urlBuilder = new StringBuilder("http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev"); /*URL*/
             urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + serviceKey); /*Service Key*/
 //            urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
 //            urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("1000000", "UTF-8")); /*한 페이지 결과 수*/
 //            urlBuilder.append("&" + URLEncoder.encode("LAWD_CD", "UTF-8") + "=" + URLEncoder.encode("11110", "UTF-8")); /*지역코드*/
-            urlBuilder.append("&" + URLEncoder.encode("LAWD_CD", "UTF-8") + "=" + URLEncoder.encode(county.getCounty_code(), "UTF-8")); /*지역코드*/
-//            urlBuilder.append("&" + URLEncoder.encode("DEAL_YMD", "UTF-8") + "=" + URLEncoder.encode("200601", "UTF-8")); /*계약월*/
-            urlBuilder.append("&" + URLEncoder.encode("DEAL_YMD", "UTF-8") + "=" + URLEncoder.encode(formattedDate, "UTF-8")); /*계약월*/
+            urlBuilder.append("&" + URLEncoder.encode("LAWD_CD", "UTF-8") + "=" + URLEncoder.encode(countyCode, "UTF-8")); /*지역코드*/
+            urlBuilder.append("&" + URLEncoder.encode("DEAL_YMD", "UTF-8") + "=" + URLEncoder.encode("202311", "UTF-8")); /*계약월*/
+//            urlBuilder.append("&" + URLEncoder.encode("DEAL_YMD", "UTF-8") + "=" + URLEncoder.encode(formattedDate, "UTF-8")); /*계약월*/
             URL url = new URL(urlBuilder.toString());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -88,6 +91,7 @@ public class AptScheduler {
             conn.disconnect();
 
             String xmlData = sb.toString();
+            System.out.println("xmlData = " + xmlData);
 
             // DocumentBuilderFactory 인스턴스 생성
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -103,7 +107,7 @@ public class AptScheduler {
 
             // "item" 태그로 요소들을 가져옴
             NodeList nList = doc.getElementsByTagName("item");
-            List<AptApiDb> aptApiDbs = new ArrayList<>();
+//            List<AptApiDb> aptApiDbs = new ArrayList<>();
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node node = nList.item(temp);
@@ -113,37 +117,79 @@ public class AptScheduler {
 
 
                     // 원하는 태그의 데이터 추출
-                    String 거래유형 = element.getElementsByTagName("거래유형").item(0).getTextContent();
-                    String 거래금액 = element.getElementsByTagName("거래금액").item(0).getTextContent();
-                    String 건축년도 = element.getElementsByTagName("건축년도").item(0).getTextContent();
-                    String 년 = element.getElementsByTagName("년").item(0).getTextContent();
-                    String 도로명 = element.getElementsByTagName("도로명").item(0).getTextContent();
+//                    String 거래유형 = element.getElementsByTagName("거래유형").item(0).getTextContent();
+//                    String 거래금액 = element.getElementsByTagName("거래금액").item(0).getTextContent();
+//                    String 건축년도 = element.getElementsByTagName("건축년도").item(0).getTextContent();
+//                    String 년 = element.getElementsByTagName("년").item(0).getTextContent();
+//                    String 도로명 = element.getElementsByTagName("도로명").item(0).getTextContent();
 //                    String 도로명건물본번호코드 = element.getElementsByTagName("도로명건물본번호코드").item(0).getTextContent();
 //                    String 도로명건물부번호코드 = element.getElementsByTagName("도로명건물부번호코드").item(0).getTextContent();
 //                    String 도로명시군구코드 = element.getElementsByTagName("도로명시군구코드").item(0).getTextContent();
 //                    String 도로명일련번호코드 = element.getElementsByTagName("도로명일련번호코드").item(0).getTextContent();
 //                    String 도로명지상지하코드 = element.getElementsByTagName("도로명지상지하코드").item(0).getTextContent();
 //                    String 도로명코드 = element.getElementsByTagName("도로명코드").item(0).getTextContent();
-                    String 법정동 = element.getElementsByTagName("법정동").item(0).getTextContent();
-                    String 법정동본번코드 = element.getElementsByTagName("법정동본번코드").item(0).getTextContent();
-                    String 법정동부번코드 = element.getElementsByTagName("법정동부번코드").item(0).getTextContent();
-                    String 법정동시군구코드 = element.getElementsByTagName("법정동시군구코드").item(0).getTextContent();
+//                    String 법정동 = element.getElementsByTagName("법정동").item(0).getTextContent();
+//                    String 법정동본번코드 = element.getElementsByTagName("법정동본번코드").item(0).getTextContent();
+//                    String 법정동부번코드 = element.getElementsByTagName("법정동부번코드").item(0).getTextContent();
+//                    String 법정동시군구코드 = element.getElementsByTagName("법정동시군구코드").item(0).getTextContent();
 //                    String 법정동읍면동코드 = element.getElementsByTagName("법정동읍면동코드").item(0).getTextContent();
 //                    String 법정동지번코드 = element.getElementsByTagName("법정동지번코드").item(0).getTextContent();
-                    String 아파트 = element.getElementsByTagName("아파트").item(0).getTextContent();
-                    String 월 = element.getElementsByTagName("월").item(0).getTextContent();
-                    String 일 = element.getElementsByTagName("일").item(0).getTextContent();
+//                    String 아파트 = element.getElementsByTagName("아파트").item(0).getTextContent();
+//                    String 월 = element.getElementsByTagName("월").item(0).getTextContent();
+//                    String 일 = element.getElementsByTagName("일").item(0).getTextContent();
 //                    String 일련번호 = element.getElementsByTagName("일련번호").item(0).getTextContent();
-                    String 전용면적 = element.getElementsByTagName("전용면적").item(0).getTextContent();
-                    String 중개사소재지 = element.getElementsByTagName("중개사소재지").item(0).getTextContent();
-                    String 지번 = element.getElementsByTagName("지번").item(0).getTextContent();
+//                    String 전용면적 = element.getElementsByTagName("전용면적").item(0).getTextContent();
+//                    String 중개사소재지 = element.getElementsByTagName("중개사소재지").item(0).getTextContent();
+//                    String 지번 = element.getElementsByTagName("지번").item(0).getTextContent();
 //                    String 지역코드 = element.getElementsByTagName("지역코드").item(0).getTextContent();
-                    String 층 = element.getElementsByTagName("층").item(0).getTextContent();
-                    String 해제사유발생일 = element.getElementsByTagName("해제사유발생일").item(0).getTextContent();
+//                    String 층 = element.getElementsByTagName("층").item(0).getTextContent();
+//                    String 해제사유발생일 = element.getElementsByTagName("해제사유발생일").item(0).getTextContent();
 //                    String 해제여부 = element.getElementsByTagName("해제여부").item(0).getTextContent();
+//                    String 등기일자 = element.getElementsByTagName("등기일자").item(0).getTextContent();
 
-                    String city = aptApiDbSVC.selectCity(법정동시군구코드).getSCHEDULER_CITY_CODE() + 법정동;
-//                        System.out.println("city = " + city);
+                    String 거래유형 = element.getElementsByTagName("거래유형").item(0) != null ? element.getElementsByTagName("거래유형").item(0).getTextContent() : "";
+                    String 거래금액 = element.getElementsByTagName("거래금액").item(0) != null ? element.getElementsByTagName("거래금액").item(0).getTextContent() : "";
+                    String 건축년도 = element.getElementsByTagName("건축년도").item(0) != null ? element.getElementsByTagName("건축년도").item(0).getTextContent() : "";
+                    String 년 = element.getElementsByTagName("년").item(0) != null ? element.getElementsByTagName("년").item(0).getTextContent() : "";
+                    String 도로명 = element.getElementsByTagName("도로명").item(0) != null ? element.getElementsByTagName("도로명").item(0).getTextContent() : "";
+                    String 법정동 = element.getElementsByTagName("법정동").item(0) != null ? element.getElementsByTagName("법정동").item(0).getTextContent() : "";
+                    String 법정동본번코드 = element.getElementsByTagName("법정동본번코드").item(0) != null ? element.getElementsByTagName("법정동본번코드").item(0).getTextContent() : "";
+                    String 법정동부번코드 = element.getElementsByTagName("법정동부번코드").item(0) != null ? element.getElementsByTagName("법정동부번코드").item(0).getTextContent() : "";
+//                    String 법정동시군구코드 = element.getElementsByTagName("법정동시군구코드").item(0) != null ? element.getElementsByTagName("법정동시군구코드").item(0).getTextContent() : "";
+                    String 아파트 = element.getElementsByTagName("아파트").item(0) != null ? element.getElementsByTagName("아파트").item(0).getTextContent() : "";
+                    String 월 = element.getElementsByTagName("월").item(0) != null ? element.getElementsByTagName("월").item(0).getTextContent() : "";
+                    String 일 = element.getElementsByTagName("일").item(0) != null ? element.getElementsByTagName("일").item(0).getTextContent() : "";
+                    String 전용면적 = element.getElementsByTagName("전용면적").item(0) != null ? element.getElementsByTagName("전용면적").item(0).getTextContent() : "";
+                    String 중개사소재지 = element.getElementsByTagName("중개사소재지").item(0) != null ? element.getElementsByTagName("중개사소재지").item(0).getTextContent() : "";
+                    String 지번 = element.getElementsByTagName("지번").item(0) != null ? element.getElementsByTagName("지번").item(0).getTextContent() : "";
+                    String 층 = element.getElementsByTagName("층").item(0) != null ? element.getElementsByTagName("층").item(0).getTextContent() : "";
+                    String 해제사유발생일 = element.getElementsByTagName("해제사유발생일").item(0) != null ? element.getElementsByTagName("해제사유발생일").item(0).getTextContent() : "";
+                    String 등기일자 = element.getElementsByTagName("등기일자").item(0) != null ? element.getElementsByTagName("등기일자").item(0).getTextContent() : "";
+                    String 법정동읍면동코드 = element.getElementsByTagName("법정동읍면동코드").item(0) != null ? element.getElementsByTagName("법정동읍면동코드").item(0).getTextContent() : "";
+
+
+
+                    String countyDistrictsNm = countyCode + 법정동읍면동코드;
+                    System.out.println("countyDistrictsNm = " + countyDistrictsNm);
+                    String countyDistrictsNmTest = aptApiDbSVC.selectCounty(countyDistrictsNm) != null
+                            ? aptApiDbSVC.selectCounty(countyDistrictsNm).getCounty()
+                            : null;
+
+                    System.out.println("countyDistrictsNmTest = " + countyDistrictsNmTest);
+
+                    String city;
+
+                    if (법정동.replace(" ", "").equals(countyDistrictsNmTest)) {
+                        System.out.println("1");
+                        city = aptApiDbSVC.selectCity(countyDistrictsNm).getCity() + 법정동;
+                        System.out.println("1 = " + city);
+                    } else {
+                        System.out.println("2");
+                        city = aptApiDbSVC.selectCity(countyDistrictsNm).getCity() + " " + aptApiDbSVC.selectCounty(countyDistrictsNm).getCounty() + 법정동;
+                        System.out.println("2 = " + city);
+                    }
+
+                    System.out.println("city = " + city);
 
                     if (월.length() == 1) {
                         월 = "0" + 월;
@@ -168,6 +214,7 @@ public class AptScheduler {
                     aptApiDb.setReason_cancellation_date(해제사유발생일);
                     aptApiDb.setTransaction_type(거래유형);
                     aptApiDb.setLocation_agency(중개사소재지);
+                    aptApiDb.setRegistration_creation(등기일자);
 
                     // 기존 코드
                     String year = contract_date.substring(0, 4);
@@ -185,7 +232,7 @@ public class AptScheduler {
                     // 추가적인 데이터 처리
                     //여기에 인설트 머지문 생성
                     try {
-                            aptApiDbSVC.ApiDb(aptApiDb);
+                        aptApiDbSVC.ApiDb(aptApiDb);
 
                     } catch (Exception e) {
                         e.printStackTrace();

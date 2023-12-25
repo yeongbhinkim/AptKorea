@@ -20,4 +20,5 @@ public interface AptApiDbSVC {
     List<CountyCode> apiRegionCounty();
 
     CountyCode selectCity(String city);
+    CountyCode selectCounty(String county);
 }
