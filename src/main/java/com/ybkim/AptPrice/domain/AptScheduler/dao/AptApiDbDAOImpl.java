@@ -51,8 +51,8 @@ public class AptApiDbDAOImpl implements AptApiDbDAO {
 //        sql.append("     full_contract_date = VALUES(full_contract_date)");
 
 
-//        sql.append("  INSERT INTO apt ( ");
-        sql.append("  INSERT INTO apt_test ( ");
+//        sql.append("  INSERT INTO apt_test ( ");
+        sql.append("  INSERT INTO apt ( ");
         sql.append("          CITY, STREET, BON_BUN, BU_BUN, DAN_GI_MYEONG, SQUARE_METER, CONTRACT_DATE, ");
         sql.append("          CONTRACT_DAY, AMOUNT, LAYER, CONSTRUCTION_DATE, ROAD_NAME, REASON_CANCELLATION_DATE, ");
         sql.append("          REGISTRATION_CREATION, TRANSACTION_TYPE, LOCATION_AGENCY, FULL_CONTRACT_DATE, ");

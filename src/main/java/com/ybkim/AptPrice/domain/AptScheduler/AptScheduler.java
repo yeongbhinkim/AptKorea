@@ -1,6 +1,9 @@
 package com.ybkim.AptPrice.domain.AptScheduler;
 
 import com.ybkim.AptPrice.domain.AptScheduler.svc.AptApiDbSVC;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -12,13 +15,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -26,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -38,11 +43,167 @@ public class AptScheduler {
     @Value("${external.api.molit.serviceKey}")
     private String serviceKey;
 
-    //    @Scheduled(cron = "*/5 * * * * *")
-    @Scheduled(cron = "0 01 16 * * ?")
+//    @Scheduled(cron = "0 57 20 * * ?")
+    @Scheduled(cron = "0 34 23 * * ?")
+    public void downloadCsvFile() {
+        System.out.println("CSV 다운로드 작업 시작");
+        List<AptApiDb> transactionsList = new ArrayList<>();
 
-//    @Scheduled(cron = "0 0 0 1 * ?")
-//@Scheduled(cron = "0 34 23 * * ?")
+        // Trust manager setup to ignore certificate validation (unsafe for production)
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+        };
+
+        try {
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            // 요청할 URL
+            URL url = new URL("https://rtdown.molit.go.kr/rtms/rqs/rtAptTrCSV.do");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+            // HTTP POST 메서드 설정
+            con.setRequestMethod("POST");
+
+            // 헤더 설정
+//            con.setRequestProperty("Accept-Language", "ko,en;q=0.9,ko-KR;q=0.8,en-US;q=0.7");
+//            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            // POST 요청에 필요한 파라미터 설정
+            // POST 요청에 필요한 파라미터 설정
+            String urlParameters = "cal_url=" + URLEncoder.encode("/sym/cmm/EgovNormalCalPopup.do", StandardCharsets.UTF_8.name()) +
+                    "&totCnt=" + URLEncoder.encode("0", StandardCharsets.UTF_8.name()) +
+                    "&exlTotCnt=" + URLEncoder.encode("0", StandardCharsets.UTF_8.name()) +
+                    "&captchaCheck=" + URLEncoder.encode("true", StandardCharsets.UTF_8.name()) +
+                    "&sidoNm=" + URLEncoder.encode("전체", StandardCharsets.UTF_8.name()) +
+                    "&sigunguNm=" + URLEncoder.encode("전체", StandardCharsets.UTF_8.name()) +
+                    "&umdNm=" + URLEncoder.encode("전체", StandardCharsets.UTF_8.name()) +
+                    "&areaNm=" + URLEncoder.encode("전체", StandardCharsets.UTF_8.name()) +
+                    "&loadNm=" + URLEncoder.encode("도로", StandardCharsets.UTF_8.name()) +
+                    "&searchFromDt=" + URLEncoder.encode("20231101", StandardCharsets.UTF_8.name()) +
+                    "&searchToDt=" + URLEncoder.encode("20231130", StandardCharsets.UTF_8.name()) +
+                    "&fileType=" + URLEncoder.encode("CSV", StandardCharsets.UTF_8.name()) +
+                    "&searchRtGubunCd=" + URLEncoder.encode("AT", StandardCharsets.UTF_8.name()) +
+                    "&gubunRadio2=" + URLEncoder.encode("1", StandardCharsets.UTF_8.name()) +
+                    "&searchSidoCd=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&searchGugunCd=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&searchDongCd=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&searchChosung=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&searchLoad=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&searchDanjiCd=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&bungiSn=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&searchArea=" + URLEncoder.encode("ALL", StandardCharsets.UTF_8.name()) +
+                    "&searchGb=" + URLEncoder.encode("2", StandardCharsets.UTF_8.name());
+
+            // POST 요청을 위한 설정
+            con.setDoOutput(true);
+            try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+                wr.writeBytes(urlParameters);
+                wr.flush();
+            }
+
+            // 응답 코드 가져오기
+            int responseCode = con.getResponseCode();
+            System.out.println("Response Code : " + responseCode);
+
+            // 응답 받기
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "EUC-KR"))) {
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+                int lineCount = 0;
+
+                while ((inputLine = in.readLine()) != null) {
+                    if (lineCount++ >= 16) {
+                        response.append(inputLine).append("\n");
+                    }
+                }
+
+//                System.out.println("response = " + response);
+                // 받은 응답을 CSV 파서로 파싱
+//                String[] records = response.toString().split("\"");
+//                System.out.println("records = " + records);
+//                for (String record : records) {
+                // 레코드가 큰따옴표로 시작한다면, 첫 번째 큰따옴표를 제거합니다.
+//                    String cleanedRecord = record.startsWith("\"") ? record.substring(1) : record;
+//                    cleanedRecord = cleanedRecord.endsWith("\"") ? cleanedRecord.substring(0, cleanedRecord.length() - 1) : cleanedRecord;
+                // CSV 파서를 사용하여 레코드 파싱
+//                    CSVParser parser = CSVParser.parse(cleanedRecord, CSVFormat.DEFAULT
+                CSVParser parser = CSVParser.parse(response.toString(), CSVFormat.DEFAULT
+                        .withHeader("city", "street", "bon_bun", "bu_bun", "dan_gi_myeong", "square_meter",
+                                "contract_date", "contract_day", "amount", "layer", "construction_date",
+                                "road_name", "reason_cancellation_date", "registration_creation", "transaction_type",
+                                "location_agency")
+                        .withSkipHeaderRecord()
+                        .withDelimiter(',')
+                        .withQuote('"')); // 필드 값이 큰따옴표로 감싸져 있으므로 인용 부호 설정
+
+                for (CSVRecord csvRecord : parser) {
+                    AptApiDb transaction = new AptApiDb();
+//                    System.out.println("csvRecord = " + csvRecord);
+                    transaction.setCity(csvRecord.get("city"));
+                    transaction.setStreet(csvRecord.get("street"));
+                    transaction.setBon_bun(csvRecord.get("bon_bun"));
+                    transaction.setBu_bun(csvRecord.get("bu_bun"));
+                    transaction.setDan_gi_myeong(csvRecord.get("dan_gi_myeong"));
+                    transaction.setSquare_meter(Float.parseFloat(csvRecord.get("square_meter")));
+                    transaction.setContract_date(csvRecord.get("contract_date"));
+                    transaction.setContract_day(csvRecord.get("contract_day"));
+                    String amountStr = csvRecord.get("amount").replace(",", "");
+                    transaction.setAmount(Integer.parseInt(amountStr));
+//                    transaction.setAmount(Integer.parseInt(csvRecord.get("amount")));
+                    transaction.setLayer(Integer.parseInt(csvRecord.get("layer")));
+                    transaction.setConstruction_date(csvRecord.get("construction_date"));
+                    transaction.setRoad_name(csvRecord.get("road_name"));
+                    transaction.setReason_cancellation_date(csvRecord.get("reason_cancellation_date"));
+                    transaction.setRegistration_creation(csvRecord.get("registration_creation"));
+                    transaction.setTransaction_type(csvRecord.get("transaction_type"));
+                    transaction.setLocation_agency(csvRecord.get("location_agency"));
+                    String contractDay = csvRecord.get("contract_day");
+                    // 숫자로 변환한 후, 두 자리 형식으로 문자열 포맷팅
+                    contractDay = String.format("%02d", Integer.parseInt(contractDay));
+                    transaction.setFullContractDate(csvRecord.get("contract_date") + contractDay);
+//                    System.out.println("transaction = " + transaction);
+                    transactionsList.add(transaction);
+                }
+            }
+//            }
+//            System.out.println("transactionsList " + transactionsList);
+            System.out.println("Transactions count: " + transactionsList.size());
+            // 리스트에 저장된 데이터 확인
+            for (AptApiDb transaction : transactionsList) {
+                //여기에 인설트 넣으면 될듯?
+                aptApiDbSVC.ApiDb(transaction);
+                System.out.println("transaction = " + transaction);
+            }
+            System.out.println("==========완료==========");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+//    @Scheduled(cron = "0 10 20 * * ?")
+
+    //    @Scheduled(cron = "0 0 0 1 * ?")
+//    @Scheduled(cron = "0 34 23 * * ?")
     public void myScheduledMethod() throws IOException, ParseException, ParserConfigurationException, SAXException {
 
 //        LocalDate startDate = LocalDate.of(2006, 1, 1);
@@ -168,7 +329,6 @@ public class AptScheduler {
                     String 법정동읍면동코드 = element.getElementsByTagName("법정동읍면동코드").item(0) != null ? element.getElementsByTagName("법정동읍면동코드").item(0).getTextContent() : "";
 
 
-
                     String countyDistrictsNm = countyCode + 법정동읍면동코드;
                     System.out.println("countyDistrictsNm = " + countyDistrictsNm);
                     String countyDistrictsNmTest = aptApiDbSVC.selectCounty(countyDistrictsNm) != null
@@ -245,5 +405,4 @@ public class AptScheduler {
         }
 //        }
     }
-
 }

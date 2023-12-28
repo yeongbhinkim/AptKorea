@@ -3,7 +3,8 @@ spring:
     cache: false
   datasource:
     driverClassName: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3307/apt
+#    url: jdbc:mariadb://localhost:3307/apt
+    url: jdbc:mariadb://172.17.0.2:3307/apt
 #    url: jdbc:mariadb://172.17.0.2:3306/apt
     username: myHome
     password: admin1234
@@ -11,6 +12,18 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+
+server:
+  #  port: 9080
+  port: 8080
+
+external:
+  api:
+    molit:
+      serviceKey: "=GIzL%2BzqBUKfyHh3o%2F38ufLPiq5P%2FReUOx6NCLFEcP7rqQei%2FPIM3QbUw3rLU1gYOQfdeIREA1cLZF7lRIP5zTg%3D%3D"
+      kakaoServiceKey: "//dapi.kakao.com/v2/maps/sdk.js?appkey=410b3a83564f0bac127be038fded443b&libraries=services"
+
+
 
 #external:
 #  api:
@@ -34,11 +47,7 @@ spring:
   #     max-request-size: 50MB
 
 # \uC11C\uBC84 \uC124\uC815
-#server:
-#  port: 8080
 
-server:
-  port: 9080
 
 
   # \uC138\uC158 \uC124\uC815 \uC608\uC2DC (\uD544\uC694\uC5D0 \uB530\uB77C \uC8FC\uC11D \uD574\uC81C)
@@ -59,8 +68,3 @@ server:
 # attach:
 #   root_dir: C:/attach/
 
-external:
-  api:
-    molit:
-      serviceKey: "=GIzL%2BzqBUKfyHh3o%2F38ufLPiq5P%2FReUOx6NCLFEcP7rqQei%2FPIM3QbUw3rLU1gYOQfdeIREA1cLZF7lRIP5zTg%3D%3D"
-      kakaoServiceKey: "//dapi.kakao.com/v2/maps/sdk.js?appkey=410b3a83564f0bac127be038fded443b&libraries=services"
