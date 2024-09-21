@@ -1,9 +1,14 @@
 package com.kim.aptpriceapp;
 
 import android.os.Bundle;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.net.http.SslError;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,26 +22,41 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 1. WebView 초기화
         mWebView = findViewById(R.id.wvLayout);
-        mWebView.loadUrl("http://10.0.2.2:9080"); //연결할 url
+        mWebSettings = mWebView.getSettings();
 
-//        mWebView.loadUrl("https://www.naver.com/"); //연결할 url
-
-        mWebView.setWebViewClient(new WebViewClient()); // 현재 앱을 나가서 새로운 브라우저를 열지 않도록 함.
-
-        mWebSettings = mWebView.getSettings(); // 웹뷰에서 webSettings를 사용할 수 있도록 함.
-        mWebSettings.setJavaScriptEnabled(true); //웹뷰에서 javascript를 사용하도록 설정
-        mWebSettings.setJavaScriptCanOpenWindowsAutomatically(false); //멀티윈도우 띄우는 것
-        mWebSettings.setAllowFileAccess(true); //파일 엑세스
-        mWebSettings.setLoadWithOverviewMode(true); // 메타태그
-        mWebSettings.setUseWideViewPort(true); //화면 사이즈 맞추기
-        mWebSettings.setSupportZoom(true); // 화면 줌 사용 여부
-        mWebSettings.setBuiltInZoomControls(true); //화면 확대 축소 사용 여부
-        mWebSettings.setDisplayZoomControls(true); //화면 확대 축소시, webview에서 확대/축소 컨트롤 표시 여부
-        mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE); // 브라우저 캐시 사용 재정의 value : LOAD_DEFAULT, LOAD_NORMAL, LOAD_CACHE_ELSE_NETWORK, LOAD_NO_CACHE, or LOAD_CACHE_ONLY
-        mWebSettings.setDefaultFixedFontSize(14); //기본 고정 글꼴 크기, value : 1~72 사이의 숫자
-        mWebSettings.setAllowContentAccess(true);//웹뷰를 통해 Content URL 에 접근 사용 여부
+        // 2. WebView 설정
+        mWebSettings.setJavaScriptEnabled(true); // JavaScript 사용 허용
+        mWebSettings.setLoadWithOverviewMode(true); // 콘텐츠가 화면 크기에 맞게 조정되도록 설정
+        mWebSettings.setUseWideViewPort(true); // Viewport 메타태그 사용 허용
+        mWebSettings.setSupportZoom(true); // 줌 기능 사용 허용
+        mWebSettings.setBuiltInZoomControls(true); // 화면 확대/축소 컨트롤 제공
+        mWebSettings.setDisplayZoomControls(false); // 화면 확대/축소 버튼 비활성화 (터치로 확대 가능)
+        mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE); // 캐시 사용 안함
+        mWebSettings.setAllowFileAccess(true); // 파일 접근 허용
+        mWebSettings.setAllowContentAccess(true); // Content URL에 접근 허용
+        mWebSettings.setDomStorageEnabled(true);  // LocalStorage 활성화
 
 
+        // 3. WebViewClient 설정 (네트워크 및 SSL 오류 처리)
+        mWebView.setWebViewClient(new WebViewClient() {
+            // 페이지 로딩 중 오류가 발생했을 때
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                Toast.makeText(MainActivity.this, "페이지 로딩 오류: " + error.getDescription(), Toast.LENGTH_SHORT).show();
+                view.loadData("<html><body><h2>네트워크 오류가 발생했습니다.</h2></body></html>", "text/html", "UTF-8");
+            }
+
+            // SSL 인증서 오류 발생 시 처리
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                handler.proceed(); // SSL 오류를 무시하고 계속 진행 (테스트 목적으로만 사용)
+                // 실제 배포 시에는 이 코드를 제거하고, 사용자에게 오류를 알리는 것이 좋습니다.
+            }
+        });
+
+        // 4. URL 로드 (앱 내에서 열도록 설정)
+        mWebView.loadUrl("https://aptkorea.store/");
     }
 }
