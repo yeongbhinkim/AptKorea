@@ -15,6 +15,22 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    packagingOptions {
+        resources {
+            excludes += ['res/mipmap-mdpi/ic_launcher.png', 'res/mipmap-mdpi/ic_launcher.webp', 'res/mipmap-mdpi/ic_launcher_round.png', 'res/mipmap-mdpi/ic_launcher_round.webp']
+        }
+    }
+
+    packagingOptions {
+        exclude 'res/mipmap-mdpi/ic_launcher.png'
+        exclude 'res/mipmap-mdpi/ic_launcher.webp'
+        exclude 'res/mipmap-xhdpi/ic_launcher.png'
+        exclude 'res/mipmap-xhdpi/ic_launcher.webp'
+        exclude 'res/mipmap-xxhdpi/ic_launcher.png'
+        exclude 'res/mipmap-xxhdpi/ic_launcher.webp'
+        exclude 'res/mipmap-xxxhdpi/ic_launcher.png'
+        exclude 'res/mipmap-xxxhdpi/ic_launcher.webp'
+    }
 
     buildTypes {
         release {
