@@ -27,7 +27,7 @@ public class homeDAOImpl implements homeDAO {
   public List<home> selectRegionCity() {
     StringBuffer sql = new StringBuffer();
 
-    sql.append(" SELECT * FROM REGION_CITY ORDER BY 2 ");
+    sql.append(" SELECT * FROM region_city ORDER BY 2 ");
 
     List<home> list = jdbcTemplate.query(sql.toString(),
         new BeanPropertyRowMapper<>(home.class)
@@ -44,8 +44,8 @@ public class homeDAOImpl implements homeDAO {
   public List<home> selectRegionCounty(String CITY_CODE) {
     StringBuffer sql = new StringBuffer();
 
-    sql.append(" SELECT * FROM REGION_COUNTY  ");
-    sql.append(" WHERE SUBSTR(COUNTY_CODE, 1,2 ) = ? ");
+    sql.append(" SELECT * FROM region_county  ");
+    sql.append(" WHERE SUBSTR(county_code, 1,2 ) = ? ");
     sql.append(" ORDER BY 2 ");
 
     List<home> list = jdbcTemplate.query(sql.toString(),
@@ -63,8 +63,8 @@ public class homeDAOImpl implements homeDAO {
   public List<home> selectRegionDistricts(String COUNTY_CODE) {
     StringBuffer sql = new StringBuffer();
 
-    sql.append(" SELECT * FROM REGION_DISTRICTS  ");
-    sql.append(" WHERE SUBSTR(DISTRICTS_CODE, 1, 5 ) = ? ");
+    sql.append(" SELECT * FROM region_districts  ");
+    sql.append(" WHERE SUBSTR(districts_code, 1, 5 ) = ? ");
     sql.append(" ORDER BY 2 ");
 
     List<home> list = jdbcTemplate.query(sql.toString(),

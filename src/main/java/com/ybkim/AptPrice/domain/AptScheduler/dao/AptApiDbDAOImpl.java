@@ -152,7 +152,7 @@ public class AptApiDbDAOImpl implements AptApiDbDAO {
     public List<CountyCode> apiSelectRegionCounty() {
         StringBuffer sql = new StringBuffer();
 
-        sql.append(" SELECT COUNTY_CODE FROM REGION_COUNTY ");
+        sql.append(" SELECT county_code FROM region_county ");
 
         List<CountyCode> list = jdbcTemplate.query(sql.toString(),
                 new BeanPropertyRowMapper<>(CountyCode.class)
@@ -171,9 +171,9 @@ public class AptApiDbDAOImpl implements AptApiDbDAO {
         String cityCodePrefix = SCHEDULER_CITY_CODE.substring(0, 2);
 
         sql.append(" SELECT ");
-        sql.append(" CONCAT((SELECT CITY_NM FROM region_city WHERE CITY_CODE = ?) ");
+        sql.append(" CONCAT((SELECT city_nm FROM region_city WHERE city_code = ?) ");
         sql.append(" ,' ', ");
-        sql.append(" (SELECT COUNTY_NM FROM region_county WHERE COUNTY_CODE = ?)) AS SCHEDULER_CITY_CODE ");
+        sql.append(" (SELECT county_nm FROM region_county WHERE county_code = ?)) AS scheduler_city_code ");
 
         CountyCode city = jdbcTemplate.queryForObject(sql.toString(),
                 new BeanPropertyRowMapper<>(CountyCode.class), cityCodePrefix, SCHEDULER_CITY_CODE
